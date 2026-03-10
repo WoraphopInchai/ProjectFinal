@@ -19,7 +19,6 @@ const pool = mysql.createPool({
   database: "laundry_system"
 })
 
-
 // =====================
 // LOGIN
 // =====================
@@ -53,7 +52,6 @@ app.post('/login', async (c) => {
     { expiresIn: "1h" }
   )
 
-  // ✅ FIX: เพิ่ม email และ room_number
   return c.json({
     message: "Login success",
     token,
@@ -64,7 +62,6 @@ app.post('/login', async (c) => {
 
 })
 
-
 // =====================
 // REGISTER USER
 // =====================
@@ -72,7 +69,6 @@ app.post('/login', async (c) => {
 app.post('/register', async (c) => {
 
   const body = await c.req.json()
-
   let { room, email, password } = body
 
   room = room.trim()
@@ -97,9 +93,8 @@ app.post('/register', async (c) => {
 
 })
 
-
 // =====================
-// GET USERS (ADMIN)
+// GET USERS
 // =====================
 
 app.get('/users', async (c) => {
@@ -112,15 +107,13 @@ app.get('/users', async (c) => {
 
 })
 
-
 // =====================
-// ADD USER (ADMIN)
+// ADD USER
 // =====================
 
 app.post('/users', async (c) => {
 
   const body = await c.req.json()
-
   let { room, email, password } = body
 
   room = room.trim()
@@ -145,7 +138,6 @@ app.post('/users', async (c) => {
 
 })
 
-
 // =====================
 // UPDATE USER
 // =====================
@@ -153,7 +145,6 @@ app.post('/users', async (c) => {
 app.put('/users/:id', async (c) => {
 
   const id = c.req.param("id")
-
   const body = await c.req.json()
 
   let { room, email, password } = body
@@ -183,7 +174,6 @@ app.put('/users/:id', async (c) => {
 
 })
 
-
 // =====================
 // DELETE USER
 // =====================
@@ -201,7 +191,6 @@ app.delete('/users/:id', async (c) => {
 
 })
 
-
 // =====================
 // GET MACHINES
 // =====================
@@ -216,7 +205,6 @@ app.get('/machines', async (c) => {
 
 })
 
-
 // =====================
 // ADD MACHINE
 // =====================
@@ -224,7 +212,6 @@ app.get('/machines', async (c) => {
 app.post('/machines/add', async (c) => {
 
   const body = await c.req.json()
-
   const { machine_number } = body
 
   const [exist]: any = await pool.query(
@@ -241,12 +228,9 @@ app.post('/machines/add', async (c) => {
     [machine_number, "available", null, 0]
   )
 
-  return c.json({
-    message: "Machine added"
-  })
+  return c.json({ message: "Machine added" })
 
 })
-
 
 // =====================
 // DELETE MACHINE
@@ -261,69 +245,97 @@ app.delete('/machines/:id', async (c) => {
     [id]
   )
 
-  return c.json({
-    message: "Machine deleted"
-  })
+  return c.json({ message: "Machine deleted" })
 
 })
 
-
 // =====================
-// UPDATE MACHINE STATUS
+// UPDATE MACHINE (FIX BUG)
 // =====================
 
 app.put('/machines/:id', async (c) => {
 
   const id = c.req.param("id")
-
   const body = await c.req.json()
 
-  const { status } = body
+  const fields: string[] = []
+  const values: any[] = []
+
+  if (body.status !== undefined) {
+    fields.push("status=?")
+    values.push(body.status)
+  }
+
+  if (body.current_user_name !== undefined) {
+    fields.push("current_user_name=?")
+    values.push(body.current_user_name)
+  }
+
+  if (body.queue_count !== undefined) {
+    fields.push("queue_count=?")
+    values.push(body.queue_count)
+  }
+
+  if (fields.length === 0) {
+    return c.json({ message: "Nothing to update" })
+  }
+
+  values.push(id)
 
   await pool.query(
-    "UPDATE machines SET status=? WHERE id=?",
-    [status, id]
+    `UPDATE machines SET ${fields.join(",")} WHERE id=?`,
+    values
   )
 
-  return c.json({
-    message: "Machine updated"
-  })
+  return c.json({ message: "Machine updated" })
 
 })
-
 
 // =====================
 // RESERVE MACHINE
 // =====================
 
-app.post('/reserve', async (c) => {
+app.post("/reserve", async (c) => {
 
   const body = await c.req.json()
+  const { machine_number, room_number } = body
 
-  const { machine_number, user } = body
-
-  const [rows]: any = await pool.query(
-    "SELECT status FROM machines WHERE machine_number=?",
+  const [machines]: any = await pool.query(
+    "SELECT * FROM machines WHERE machine_number=?",
     [machine_number]
   )
 
-  if (rows.length === 0) {
-    return c.json({ message: "Machine not found" }, 404)
+  if (machines.length === 0) {
+    return c.json({ error: "Machine not found" }, 404)
   }
 
-  if (rows[0].status !== "available") {
-    return c.json({ message: "Machine not available" }, 400)
+  const m = machines[0]
+
+  if (m.status === "available") {
+
+    await pool.query(
+      `UPDATE machines 
+       SET status='reserved',
+       current_user_name=?,
+       queue_count=1
+       WHERE machine_number=?`,
+      [room_number, machine_number]
+    )
+
+  } else {
+
+    await pool.query(
+      `UPDATE machines 
+       SET queue_count = IFNULL(queue_count,0) + 1
+       WHERE machine_number=?`,
+      [machine_number]
+    )
+
   }
 
-  await pool.query(
-    "UPDATE machines SET status='reserved', current_user_name=? WHERE machine_number=?",
-    [user, machine_number]
-  )
-
-  return c.json({ message: "Machine reserved" })
+  return c.json({ message: "reserved success" })
 
 })
-
 
 // =====================
 // CANCEL RESERVATION
@@ -332,18 +344,20 @@ app.post('/reserve', async (c) => {
 app.post('/cancel', async (c) => {
 
   const body = await c.req.json()
-
   const { machine_number } = body
 
   await pool.query(
-    "UPDATE machines SET status='available', current_user_name=NULL WHERE machine_number=?",
+    `UPDATE machines 
+     SET status='available',
+     current_user_name=NULL,
+     queue_count=0
+     WHERE machine_number=?`,
     [machine_number]
   )
 
   return c.json({ message: "Reservation cancelled" })
 
 })
-
 
 // =====================
 // REPORT MACHINE
@@ -352,7 +366,6 @@ app.post('/cancel', async (c) => {
 app.post('/report', async (c) => {
 
   const body = await c.req.json()
-
   const { machine_number } = body
 
   await pool.query(
@@ -360,12 +373,9 @@ app.post('/report', async (c) => {
     [machine_number]
   )
 
-  return c.json({
-    message: "Report received"
-  })
+  return c.json({ message: "Report received" })
 
 })
-
 
 // =====================
 // HOME
@@ -374,7 +384,6 @@ app.post('/report', async (c) => {
 app.get('/', (c) => {
   return c.text('Laundry API')
 })
-
 
 // =====================
 // START SERVER
