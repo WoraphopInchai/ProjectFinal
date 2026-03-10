@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reserve</title>
+
+<link rel="stylesheet" href="Res.css">
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+</head>
+
+<body>
+
+<header class="top-bar">
+
+<div class="user">
+
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"/>
+
+<div>
+<p class="welcome">Your Queue</p>
+<h3 id="userRoom">Room -</h3>
+</div>
+
+</div>
+
+<div class="header-right">
+<button id="logoutBtn">ออกจากระบบ</button>
+</div>
+
+</header>
+
+
+<div class="queue-container">
+
+<div class="queue-card">
+
+<div class="logo-title">
+
+<img src="Logo.png" class="logo">
+
+<div>
+<h2>Washing Machine Queue</h2>
+<p>© Akm Resident</p>
+</div>
+
+</div>
+
+
+<div class="queue-info">
+
+<div class="box">
+<p>Your Queue</p>
+<h1 id="yourQueue">-</h1>
+</div>
+
+<div class="line"></div>
+
+<div class="box">
+<p>Waiting</p>
+<h1 id="waitingQueue">-</h1>
+</div>
+
+</div>
+
+<hr>
+
+<div class="details">
+
+<p id="queueDate">-</p>
+<h3 id="machineNumber">Machine -</h3>
+
+<small class="warning">
+
+*Queue may be skipped if identity verification is not completed on time
+
+</small>
+
+</div>
+
+<button id="openQR" class="reserve-btn">
+Open Scanner
+</button>
+
+<button id="cancelQueue" class="cancel-btn">
+Cancel Reservation
+</button>
+
+</div>
+
+</div>
+
+
+<!-- QR POPUP -->
+
+<div id="qrPopup" class="popup">
+
+<div class="popup-card">
+
+<div class="popup-header">
+
+<h2>It's Your Turn</h2>
+<p>Scan the QR code on the washing machine</p>
+
+<h3 id="countdown">05:00</h3>
+
+</div>
+
+<div class="camera-box">
+<div id="qr-reader"></div>
+</div>
+
+<button id="closePopup" class="cancel-btn">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+
+<!-- LOGOUT POPUP -->
+
+<div id="logoutPopup" class="popup-overlay">
+
+<div class="popup-box">
+
+<p class="popup-text">
+คุณต้องการออกจากระบบหรือไม่?
+</p>
+
+<div class="popup-buttons">
+
+<button id="confirmLogout">ออกจากระบบ</button>
+<button id="cancelLogout">ยกเลิก</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<nav class="bottom-nav">
+<a id="homeBtn">🏠 Home</a>
+<a id="notiBtn">🔔 Noti</a>
+<a id="reserveBtn">❤️ Reserve</a>
+</nav>
+
+
+<script src="../nav.js"></script>
+<script src="Res.js"></script>
+
+</body>
+</html>

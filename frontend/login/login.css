@@ -1,0 +1,292 @@
+body{
+
+font-family: Arial, sans-serif;
+
+background: linear-gradient(135deg,#7ec8ff,#dff6ff);
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+min-height:100vh;
+
+margin:0;
+
+}
+
+/* กล่อง login */
+
+.login-box{
+
+background:white;
+
+padding:40px 35px;
+
+width:90%;
+max-width:360px;
+
+border-radius:18px;
+
+box-shadow:0 15px 35px rgba(0,0,0,0.15);
+
+text-align:center;
+
+position:relative;
+z-index:1;
+
+}
+
+/* หัวข้อ */
+
+h2{
+
+margin-top:0;
+margin-bottom:25px;
+
+font-size:26px;
+color:#2a5d9f;
+
+}
+
+/* form */
+
+form{
+text-align:left;
+}
+
+/* label */
+
+label{
+display:block;
+margin-bottom:6px;
+font-weight:500;
+}
+
+/* input */
+
+input{
+
+width:100%;
+
+padding:12px;
+
+margin-bottom:18px;
+
+border:1px solid #dcdcdc;
+
+border-radius:8px;
+
+font-size:16px;
+
+box-sizing:border-box;
+
+transition:0.2s;
+
+}
+
+input:focus{
+
+border-color:#2ea3ff;
+outline:none;
+box-shadow:0 0 5px rgba(46,163,255,0.4);
+
+}
+
+/* ปุ่ม */
+
+button{
+
+width:100%;
+
+padding:14px;
+
+background:linear-gradient(135deg,#2ea3ff,#1b82d1);
+
+color:white;
+
+border:none;
+
+border-radius:8px;
+
+font-size:16px;
+
+cursor:pointer;
+
+font-weight:600;
+
+transition:0.2s;
+
+}
+
+button:hover{
+
+transform:translateY(-2px);
+
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+
+}
+
+#result{
+
+margin-top:10px;
+color:red;
+
+}
+
+/* ประตูเครื่องซัก */
+
+.washer-door{
+
+width:80px;
+height:80px;
+
+background: radial-gradient(circle,#9fd9ff,#2ea3ff);
+
+border-radius:50%;
+
+margin:auto;
+margin-bottom:20px;
+
+border:6px solid #d0eaff;
+
+}
+
+/* ฟองสบู่ */
+
+.bubbles{
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+overflow:hidden;
+
+z-index:0;
+
+}
+
+.bubbles span{
+
+position:absolute;
+bottom:-120px;
+
+width:25px;
+height:25px;
+
+background:rgba(255,255,255,0.6);
+
+border-radius:50%;
+
+box-shadow:
+inset 0 0 10px rgba(255,255,255,0.8),
+0 0 10px rgba(255,255,255,0.6);
+
+animation:rise 12s infinite ease-in;
+
+}
+
+.bubbles span:nth-child(1){ left:5%; animation-duration:8s; }
+.bubbles span:nth-child(2){ left:15%; animation-duration:12s; }
+.bubbles span:nth-child(3){ left:25%; animation-duration:9s; }
+.bubbles span:nth-child(4){ left:35%; animation-duration:11s; }
+.bubbles span:nth-child(5){ left:45%; animation-duration:10s; }
+.bubbles span:nth-child(6){ left:55%; animation-duration:14s; }
+.bubbles span:nth-child(7){ left:65%; animation-duration:9s; }
+.bubbles span:nth-child(8){ left:75%; animation-duration:13s; }
+.bubbles span:nth-child(9){ left:85%; animation-duration:10s; }
+.bubbles span:nth-child(10){ left:95%; animation-duration:12s; }
+.bubbles span:nth-child(11){ left:30%; animation-duration:15s; }
+.bubbles span:nth-child(12){ left:60%; animation-duration:11s; }
+.bubbles span:nth-child(13){ left:70%; animation-duration:8s; }
+.bubbles span:nth-child(14){ left:40%; animation-duration:13s; }
+.bubbles span:nth-child(15){ left:20%; animation-duration:10s; }
+
+@keyframes rise{
+
+0%{
+transform:translateY(0);
+opacity:0;
+}
+
+30%{
+opacity:1;
+}
+
+100%{
+transform:translateY(-110vh);
+opacity:0;
+}
+
+}
+
+.bubbles span:nth-child(odd){
+width:20px;
+height:20px;
+}
+
+.bubbles span:nth-child(even){
+width:35px;
+height:35px;
+}
+
+/* มือถือ */
+
+@media (max-width:480px){
+
+body{
+align-items:flex-start;
+padding-top:60px;
+}
+
+.login-box{
+
+width:88%;
+max-width:300px;
+
+padding:22px 20px;
+
+border-radius:16px;
+
+}
+
+h2{
+
+font-size:20px;
+margin-bottom:18px;
+
+}
+
+label{
+
+font-size:14px;
+
+}
+
+input{
+
+padding:10px;
+font-size:14px;
+
+margin-bottom:14px;
+
+}
+
+button{
+
+padding:11px;
+font-size:14px;
+
+}
+
+.washer-door{
+
+width:65px;
+height:65px;
+
+}
+
+}

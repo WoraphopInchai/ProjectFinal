@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Laundry Admin Dashboard</title>
+
+<link rel="stylesheet" href="admin-dashboard.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+
+<div class="header-top">
+
+<div>
+Welcome<br>
+<b>Admin</b>
+</div>
+
+<button id="logoutBtn">Logout</button>
+
+</div>
+
+</div>
+
+
+<!-- ================= MACHINE PAGE ================= -->
+
+<div id="machinePage">
+
+<!-- FILTER -->
+<div class="tabs">
+
+<button class="tab active" data-filter="all">All</button>
+<button class="tab" data-filter="free">Available</button>
+<button class="tab" data-filter="using">In Use</button>
+<button class="tab" data-filter="broken">Broken</button>
+
+</div>
+
+<!-- ADD MACHINE -->
+<div class="actions">
+
+<button id="addMachineBtn" class="add-machine-btn">
+➕ Add Machine
+</button>
+
+</div>
+
+<div id="machineList"></div>
+
+</div>
+
+
+<!-- ================= USER PAGE ================= -->
+
+<div id="userPage">
+
+<h3>Add User</h3>
+
+Room
+<input type="text" id="room">
+
+Email
+<input type="email" id="email">
+
+Password
+<input type="password" id="password">
+
+<button onclick="addUser()">Add User</button>
+
+<hr>
+
+<h3>User List</h3>
+
+<table>
+
+<thead>
+<tr>
+<th>Room</th>
+<th>Email</th>
+<th>Role</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="userTable">
+</tbody>
+
+</table>
+
+</div>
+
+
+<!-- ================= BOTTOM NAV ================= -->
+
+<nav class="bottom-nav">
+
+<a class="nav-item active" id="homeBtn">
+<i class="fa-solid fa-house"></i>
+<span>Machines</span>
+</a>
+
+<a class="nav-item" id="userBtn">
+<i class="fa-solid fa-users"></i>
+<span>Users</span>
+</a>
+
+<a class="nav-item" id="notiBtn">
+<i class="fa-solid fa-bell"></i>
+<span>Notifications</span>
+</a>
+
+</nav>
+
+
+<!-- ADD MACHINE MODAL -->
+<div id="addModal" class="modal">
+<div class="modal-content">
+
+<h3>Add Washing Machine</h3>
+
+<input type="number" id="machineNumber" placeholder="Machine Number">
+
+<div class="modal-buttons">
+<button id="addConfirm">Add</button>
+<button id="addCancel">Cancel</button>
+</div>
+
+</div>
+</div>
+
+
+<!-- DELETE MACHINE MODAL -->
+<div id="deleteModal" class="modal">
+<div class="modal-content">
+
+<h3>Delete this machine?</h3>
+
+<div class="modal-buttons">
+<button id="deleteConfirm">Delete</button>
+<button id="deleteCancel">Cancel</button>
+</div>
+
+</div>
+</div>
+
+
+<!-- LOGOUT POPUP -->
+<div id="logoutPopup" class="modal">
+<div class="modal-content">
+
+<h3>Are you sure you want to logout?</h3>
+
+<div class="modal-buttons">
+<button id="confirmLogout">Logout</button>
+<button id="cancelLogout">Cancel</button>
+</div>
+
+</div>
+</div>
+
+<script src="admin-dashboard.js"></script>
+
+</body>
+</html>

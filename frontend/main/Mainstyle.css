@@ -1,0 +1,439 @@
+/* RESET */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family: Arial, Helvetica, sans-serif;
+}
+
+/* BODY */
+
+body{
+background:#eef1f7;
+display:flex;
+flex-direction:column;
+min-height:100vh;
+}
+
+
+/* HEADER */
+
+.header{
+background:#4a6cf7;
+color:white;
+padding:16px 22px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+box-shadow:0 4px 12px rgba(0,0,0,0.12);
+}
+
+.header h1{
+font-size:22px;
+}
+
+.user-section{
+display:flex;
+gap:12px;
+align-items:center;
+font-size:14px;
+}
+
+#logoutBtn{
+padding:7px 14px;
+border:none;
+border-radius:8px;
+background:white;
+color:#4a6cf7;
+cursor:pointer;
+font-weight:bold;
+transition:0.2s;
+}
+
+#logoutBtn:hover{
+background:#f1f1f1;
+}
+
+
+/* MACHINE SECTION */
+
+.machine-section{
+padding:24px;
+flex:1;
+}
+
+.machine-section h2{
+margin-bottom:20px;
+font-size:20px;
+}
+
+
+/* MACHINE GRID */
+
+.machine-container{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+gap:22px;
+}
+
+
+/* MACHINE CARD */
+
+.machine-card{
+background:white;
+border-radius:16px;
+padding:22px;
+border:1px solid #e5e7eb;
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+text-align:center;
+transition:0.25s;
+position:relative;
+}
+
+.machine-card:hover{
+transform:translateY(-6px);
+box-shadow:0 16px 35px rgba(0,0,0,0.15);
+}
+
+
+/* MACHINE IMAGE */
+
+.machine-img{
+width:80px;
+height:80px;
+object-fit:contain;
+margin-bottom:10px;
+}
+
+
+/* MACHINE TITLE */
+
+.machine-title{
+font-size:18px;
+font-weight:bold;
+margin-bottom:8px;
+color:#333;
+}
+
+
+/* MACHINE INFO */
+
+.machine-info{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:6px;
+margin-bottom:8px;
+}
+
+
+/* STATUS BADGE */
+
+.status-badge{
+display:flex;
+align-items:center;
+gap:6px;
+padding:4px 10px;
+border-radius:20px;
+font-size:13px;
+font-weight:bold;
+background:#f3f4f6;
+}
+
+
+/* STATUS DOT */
+
+.status-dot{
+width:10px;
+height:10px;
+border-radius:50%;
+}
+
+
+/* STATUS COLORS */
+
+.available{
+color:#22c55e;
+}
+
+.available .status-dot{
+background:#22c55e;
+}
+
+.reserved{
+color:#f59e0b;
+}
+
+.reserved .status-dot{
+background:#f59e0b;
+}
+
+.in_use{
+color:#ef4444;
+}
+
+.in_use .status-dot{
+background:#ef4444;
+}
+
+.broken{
+color:#6b7280;
+}
+
+.broken .status-dot{
+background:#6b7280;
+}
+
+
+/* QUEUE */
+
+.queue-info{
+font-size:13px;
+color:#666;
+}
+
+
+/* BUTTON GROUP */
+
+.machine-buttons{
+margin-top:10px;
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+
+
+/* BUTTONS */
+
+.machine-buttons button{
+padding:10px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:13px;
+font-weight:bold;
+transition:0.2s;
+}
+
+
+/* RESERVE */
+
+.reserve-btn{
+background:#4a6cf7;
+color:white;
+}
+
+.reserve-btn:hover{
+background:#3553d4;
+}
+
+
+/* CANCEL */
+
+.cancel-btn{
+background:#e5e7eb;
+color:#333;
+}
+
+.cancel-btn:hover{
+background:#d1d5db;
+}
+
+
+/* REPORT */
+
+.report-btn{
+background:#ef4444;
+color:white;
+}
+
+.report-btn:hover{
+background:#dc2626;
+}
+
+
+/* DISABLED BUTTON */
+
+.machine-buttons button:disabled{
+opacity:0.45;
+cursor:not-allowed;
+}
+
+
+/* BOTTOM NAV */
+
+.bottom-nav{
+background:white;
+border-top:1px solid #ddd;
+display:flex;
+justify-content:space-around;
+padding:12px 0;
+position:sticky;
+bottom:0;
+box-shadow:0 -2px 10px rgba(0,0,0,0.05);
+}
+
+.bottom-nav button{
+background:none;
+border:none;
+font-size:16px;
+cursor:pointer;
+font-weight:bold;
+color:#444;
+transition:0.2s;
+}
+
+.bottom-nav button:hover{
+color:#4a6cf7;
+}
+
+
+/* ================= POPUP ================= */
+
+.popup-overlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.45);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:1000;
+}
+
+.popup-box{
+background:white;
+padding:32px;
+border-radius:18px;
+width:380px;
+max-width:90%;
+text-align:center;
+box-shadow:0 18px 40px rgba(0,0,0,0.25);
+animation:popupFade 0.25s ease;
+}
+
+.popup-title{
+font-size:20px;
+font-weight:bold;
+margin-bottom:12px;
+}
+
+.popup-text{
+font-size:16px;
+line-height:1.7;
+margin-bottom:12px;
+}
+
+.popup-subtext{
+font-size:14px;
+color:#666;
+margin-bottom:22px;
+line-height:1.6;
+}
+
+.popup-buttons{
+display:flex;
+gap:12px;
+justify-content:center;
+margin-top:16px;
+}
+
+.popup-buttons button{
+flex:1;
+padding:11px;
+border:none;
+border-radius:10px;
+font-size:14px;
+font-weight:bold;
+cursor:pointer;
+transition:0.2s;
+}
+
+
+/* POPUP BUTTONS */
+
+#confirmReserve{
+background:#22c55e;
+color:white;
+}
+
+#confirmReserve:hover{
+background:#16a34a;
+}
+
+#cancelReserve{
+background:#e5e7eb;
+color:#333;
+}
+
+#confirmLogout{
+background:#ef4444;
+color:white;
+}
+
+#cancelLogout{
+background:#e5e7eb;
+color:#333;
+}
+
+#sendReport{
+background:#4a6cf7;
+color:white;
+}
+
+#cancelReport{
+background:#e5e7eb;
+color:#333;
+}
+
+
+/* REPORT OPTIONS */
+
+.report-options{
+text-align:left;
+margin-top:10px;
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+
+.report-options label{
+font-size:15px;
+cursor:pointer;
+}
+
+
+/* POPUP ANIMATION */
+
+@keyframes popupFade{
+from{
+transform:scale(0.9);
+opacity:0;
+}
+to{
+transform:scale(1);
+opacity:1;
+}
+}
+
+
+/* MACHINE LOCKED */
+
+.locked-machine{
+pointer-events:none;
+opacity:0.55;
+}
+
+.locked-machine::after{
+content:"";
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(200,200,200,0.45);
+border-radius:16px;
+}

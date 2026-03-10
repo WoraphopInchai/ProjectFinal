@@ -1,0 +1,461 @@
+/* ============================= */
+/* RESET */
+/* ============================= */
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
+html{
+scroll-behavior:smooth;
+height:100%;
+}
+
+body{
+font-family:'Segoe UI', Arial, Helvetica, sans-serif;
+background:#ffffff;
+padding-bottom:90px;
+color:#333;
+min-height:100vh;
+}
+
+
+/* ============================= */
+/* HEADER */
+/* ============================= */
+
+.header{
+background:linear-gradient(180deg,#4da6ff,#2a6fff);
+color:white;
+padding:20px;
+box-shadow:0 6px 15px rgba(0,0,0,0.15);
+border-bottom-left-radius:20px;
+border-bottom-right-radius:20px;
+}
+
+.header-top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+font-size:15px;
+}
+
+.header b{
+font-size:18px;
+}
+
+
+/* LOGOUT BUTTON */
+
+#logoutBtn{
+padding:8px 15px;
+border:none;
+border-radius:10px;
+background:white;
+color:#2a6fff;
+cursor:pointer;
+font-weight:bold;
+transition:all .25s ease;
+}
+
+#logoutBtn:hover{
+background:#f2f2f2;
+transform:scale(1.05);
+}
+
+
+/* ============================= */
+/* USER PAGE */
+/* ============================= */
+
+#userPage{
+display:none;
+background:white;
+padding:20px;
+min-height:calc(100vh - 140px);
+}
+
+#userPage input{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:10px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+#userPage button{
+padding:10px 16px;
+border:none;
+border-radius:8px;
+background:#2a6fff;
+color:white;
+cursor:pointer;
+font-weight:bold;
+}
+
+
+/* ============================= */
+/* TABLE */
+/* ============================= */
+
+table{
+width:100%;
+margin-top:20px;
+border-collapse:collapse;
+background:white;
+border-radius:10px;
+overflow:hidden;
+box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+table th{
+background:#f3f6ff;
+padding:12px;
+font-size:14px;
+}
+
+table td{
+padding:10px;
+border-top:1px solid #eee;
+text-align:center;
+}
+
+
+/* ============================= */
+/* TABS */
+/* ============================= */
+
+.tabs{
+display:flex;
+gap:8px;
+margin:16px;
+padding:6px;
+background:white;
+border-radius:20px;
+box-shadow:0 6px 14px rgba(0,0,0,0.06);
+}
+
+.tab{
+flex:1;
+border:none;
+padding:12px 0;
+font-size:14px;
+border-radius:14px;
+cursor:pointer;
+color:#555;
+transition:all .25s ease;
+background:transparent;
+}
+
+.tab:hover{
+background:#f2f6ff;
+}
+
+.tab.active{
+background:linear-gradient(135deg,#4da6ff,#2a6fff);
+color:white;
+font-weight:bold;
+}
+
+
+/* ============================= */
+/* ADD MACHINE BUTTON */
+/* ============================= */
+
+.actions{
+display:flex;
+justify-content:center;
+margin:20px;
+}
+
+.add-machine-btn{
+background:linear-gradient(135deg,#4da6ff,#1b4fff);
+color:white;
+border:none;
+border-radius:30px;
+padding:14px 28px;
+font-size:15px;
+font-weight:bold;
+cursor:pointer;
+box-shadow:0 8px 18px rgba(0,0,0,0.2);
+transition:all .25s ease;
+}
+
+.add-machine-btn:hover{
+transform:translateY(-3px);
+box-shadow:0 10px 20px rgba(0,0,0,0.25);
+}
+
+.add-machine-btn:active{
+transform:scale(0.96);
+}
+
+
+/* ============================= */
+/* MACHINE CARD */
+/* ============================= */
+
+.machine{
+background:white;
+margin:14px;
+padding:20px;
+border-radius:20px;
+box-shadow:0 8px 18px rgba(0,0,0,0.08);
+border-left:6px solid #4da6ff;
+transition:all .25s ease;
+}
+
+.machine:hover{
+transform:translateY(-4px);
+box-shadow:0 12px 22px rgba(0,0,0,0.12);
+}
+
+.machine h4{
+margin-bottom:6px;
+font-size:17px;
+}
+
+.machine p{
+margin:4px 0;
+font-size:14px;
+color:#555;
+}
+
+
+/* ============================= */
+/* STATUS */
+/* ============================= */
+
+.status{
+font-weight:bold;
+}
+
+.free{
+color:#16a34a;
+}
+
+.using{
+color:#f59e0b;
+}
+
+.broken{
+color:#ef4444;
+}
+
+
+/* ============================= */
+/* MACHINE BUTTONS */
+/* ============================= */
+
+.actions-buttons{
+margin-top:14px;
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+}
+
+.actions-buttons button{
+flex:1;
+border:none;
+border-radius:12px;
+padding:10px;
+font-size:13px;
+cursor:pointer;
+font-weight:bold;
+transition:all .2s ease;
+}
+
+.actions-buttons button:hover{
+transform:translateY(-1px);
+}
+
+.actions-buttons button:active{
+transform:scale(.94);
+}
+
+
+/* BUTTON COLORS */
+
+.report{
+background:#333;
+color:white;
+}
+
+.reset{
+background:#e5e7ff;
+color:#2a2abf;
+}
+
+.delete{
+background:#ff4d4d;
+color:white;
+}
+
+
+/* ============================= */
+/* MODAL */
+/* ============================= */
+
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.45);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:1000;
+}
+
+.modal-content{
+background:white;
+padding:24px;
+border-radius:20px;
+width:85%;
+max-width:320px;
+text-align:center;
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
+animation:popup .25s ease;
+}
+
+.modal-buttons{
+margin-top:15px;
+display:flex;
+gap:10px;
+justify-content:center;
+}
+
+.modal-buttons button{
+padding:8px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+}
+
+
+/* ============================= */
+/* BOTTOM NAV */
+/* ============================= */
+
+.bottom-nav{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+height:70px;
+background:white;
+border-top:1px solid #ddd;
+display:flex;
+justify-content:space-around;
+align-items:center;
+box-shadow:0 -4px 10px rgba(0,0,0,0.08);
+}
+
+.nav-item{
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+font-size:13px;
+color:#555;
+text-decoration:none;
+font-weight:600;
+transition:0.2s;
+}
+
+.nav-item i{
+font-size:18px;
+margin-bottom:3px;
+}
+
+.nav-item:hover{
+color:#2a6fff;
+}
+
+.nav-item.active{
+color:#2a6fff;
+}
+
+.nav-item.active i{
+color:#2a6fff;
+}
+
+
+/* ============================= */
+/* MOBILE */
+/* ============================= */
+
+@media (max-width:480px){
+
+.header{
+padding:16px;
+}
+
+.tab{
+font-size:12px;
+padding:10px 0;
+}
+
+.machine{
+margin:12px;
+padding:18px;
+}
+
+.actions-buttons{
+flex-direction:column;
+}
+
+}
+
+
+/* ============================= */
+/* POPUP ANIMATION */
+/* ============================= */
+
+@keyframes popup{
+
+from{
+transform:scale(.9);
+opacity:0;
+}
+
+to{
+transform:scale(1);
+opacity:1;
+}
+
+}
+
+/* ============================= */
+/* QUEUE BOX */
+/* ============================= */
+
+.queue-box{
+margin-top:10px;
+padding:12px;
+background:#f4f7ff;
+border-radius:10px;
+font-size:14px;
+}
+
+.queue-box b{
+display:block;
+margin-bottom:5px;
+}
+
+.queue-list{
+padding-left:18px;
+margin-top:5px;
+}
+
+.queue-list li{
+margin-bottom:3px;
+font-size:13px;
+color:#444;
+}
