@@ -1,3 +1,5 @@
+const API = "https://projectfinal-production-49ed.up.railway.app"
+
 document.getElementById("loginForm").addEventListener("submit", async function(e){
 
 e.preventDefault()
@@ -10,7 +12,7 @@ result.innerText = "Checking..."
 
 try{
 
-const response = await fetch("http://localhost:3000/login",{
+const response = await fetch(API + "/login",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -32,7 +34,7 @@ localStorage.setItem("token", data.token)
 localStorage.setItem("role", data.role || "")
 localStorage.setItem("room_number", data.room_number || "")
 localStorage.setItem("email", data.email || "")
-localStorage.setItem("user_id", data.user_id || "") // ⭐ เพิ่มบรรทัดนี้
+localStorage.setItem("user_id", data.user_id || "")
 
 if(data.role && data.role.toLowerCase() === "admin"){
 
