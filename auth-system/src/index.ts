@@ -241,6 +241,40 @@ return c.json({ message: "Machine deleted" })
 })
 
 // =====================
+// ADMIN RESET MACHINE
+// =====================
+
+app.post('/admin/reset', async (c) => {
+
+const body = await c.req.json()
+const { machine_number } = body
+
+if(!machine_number){
+return c.json({message:"machine_number required"},400)
+}
+
+// ลบคิวทั้งหมด
+await pool.query(
+`DELETE FROM machine_queue WHERE machine_number=?`,
+[machine_number]
+)
+
+// รีเซ็ตเครื่อง
+await pool.query(
+`UPDATE machines
+SET status='available',
+current_user_name=NULL,
+start_time=NULL,
+end_time=NULL
+WHERE machine_number=?`,
+[machine_number]
+)
+
+return c.json({message:"Machine reset success"})
+
+})
+
+// =====================
 // RESERVE MACHINE
 // =====================
 
