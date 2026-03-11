@@ -221,6 +221,16 @@ statusText = "เสีย"
 statusClass = "broken"
 }
 
+let room = "-"
+
+if(machine.room_number){
+room = machine.room_number
+}
+
+if(machine.current_user_name){
+room = machine.current_user_name
+}
+
 div.innerHTML = `
 
 <h4>Machine ${machine.machine_number}</h4>
@@ -229,13 +239,9 @@ div.innerHTML = `
 ${statusText}
 </span></p>
 
-<p>ห้องที่กำลังใช้ : ${
-machine.current_user_name
-? machine.current_user_name
-: machine.room_number
-? machine.room_number
-: "-"
-}</p>
+<p>ห้องที่กำลังใช้ : ${room}</p>
+
+<p>จำนวนคิว : ${machine.queue_count || 0}</p>
 
 <div class="actions-buttons">
 
@@ -260,20 +266,35 @@ loadMachines()
 
 })
 
-// รีเซ็ต
+// ========================
+// RESET MACHINE (แก้ตรงนี้)
+// ========================
+
 div.querySelector(".reset").addEventListener("click", async ()=>{
 
-await fetch(`http://localhost:3000/machines/${machine.id}`,{
-method:"PUT",
+if(!confirm("ต้องการรีเซ็ตเครื่องนี้หรือไม่")) return
+
+try{
+
+await fetch("http://localhost:3000/admin/reset",{
+method:"POST",
 headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({ status:"available" })
+body:JSON.stringify({
+machine_number: machine.machine_number
+})
 })
 
 loadMachines()
 
+}catch(err){
+
+console.log("รีเซ็ตเครื่องไม่สำเร็จ",err)
+
+}
+
 })
 
-// ลบ
+// ลบเครื่อง
 div.querySelector(".delete").addEventListener("click",()=>{
 
 machineIdToDelete = machine.id

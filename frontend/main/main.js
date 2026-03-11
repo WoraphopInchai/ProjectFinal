@@ -1,14 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
 
 loadUserInfo()
-
 loadMachines()
 
 setupLogout()
-
 setupReservePopup()
 setupReportPopup()
 setupCancelPopup()
+setupCountdownPopup()
 
 setInterval(loadMachines,3000)
 
@@ -38,8 +37,204 @@ let reservedMachine = null
 let reportMachineNumber = null
 let isLoading = false
 
-// ดึงเลขห้องจาก login
 const currentUser = localStorage.getItem("room_number")
+
+// ============================
+// COUNTDOWN SYSTEM
+// ============================
+
+let countdownInterval = null
+let countdownSeconds = 300
+let countdownMachine = null
+
+let qrScanner = null
+
+async function stopCamera(){
+if(qrScanner){
+try{
+await qrScanner.stop()
+}catch(e){}
+qrScanner = null
+}
+}
+
+function setupCountdownPopup(){
+
+const cancelBtn = document.getElementById("cancelCountdownBtn")
+const scanBtn = document.getElementById("scanQRBtn")
+
+if(cancelBtn){
+
+cancelBtn.onclick = async () => {
+
+clearInterval(countdownInterval)
+
+await stopCamera()
+
+document.getElementById("countdownPopup").style.display = "none"
+
+if(countdownMachine){
+
+await fetch("http://localhost:3000/cancel",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+machine_number:countdownMachine,
+room_number:currentUser
+})
+
+})
+
+reservedMachine = null
+
+loadMachines()
+
+}
+
+}
+
+}
+
+if(scanBtn){
+
+scanBtn.onclick = async () => {
+
+if(qrScanner) return
+
+qrScanner = new Html5Qrcode("qr-reader")
+
+qrScanner.start(
+{ facingMode: "environment" },
+{
+fps:10,
+qrbox:250
+},
+async (decodedText) => {
+
+console.log("QR:",decodedText)
+
+if(decodedText !== "machine_" + countdownMachine){
+
+alert("Wrong machine")
+return
+
+}
+
+await fetch("http://localhost:3000/confirm-machine",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+machine_number: countdownMachine,
+room_number: currentUser
+})
+
+})
+
+await stopCamera()
+
+clearInterval(countdownInterval)
+
+document.getElementById("countdownPopup").style.display = "none"
+
+alert("Machine confirmed. Washing started")
+
+loadMachines()
+
+}
+)
+
+}
+
+}
+
+}
+
+function startCountdown(machineNumber){
+
+if(countdownInterval) return
+
+const popup = document.getElementById("countdownPopup")
+const timer = document.getElementById("countdownTimer")
+
+if(!popup || !timer) return
+
+popup.style.display = "flex"
+
+countdownMachine = machineNumber
+
+countdownSeconds = 300
+
+updateTimer(timer)
+
+countdownInterval = setInterval(async () => {
+
+countdownSeconds--
+
+updateTimer(timer)
+
+if(countdownSeconds <= 0){
+
+clearInterval(countdownInterval)
+countdownInterval = null
+
+await stopCamera()
+
+popup.style.display = "none"
+
+alert("Reservation expired")
+
+await fetch("http://localhost:3000/cancel",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+machine_number:machineNumber,
+room_number:currentUser
+})
+
+})
+
+reservedMachine = null
+
+loadMachines()
+
+}
+
+},1000)
+
+}
+
+function updateTimer(timer){
+
+const minutes = Math.floor(countdownSeconds / 60)
+const seconds = countdownSeconds % 60
+
+timer.innerText =
+String(minutes).padStart(2,"0")
++
+":"
++
+String(seconds).padStart(2,"0")
+
+}
+
+// ============================
+// LOAD MACHINES
+// ============================
 
 async function loadMachines(){
 
@@ -54,11 +249,28 @@ try{
 const res = await fetch("http://localhost:3000/machines")
 const machines = await res.json()
 
-const myReserved = machines.find(
-m => m.current_user_name == currentUser && m.status === "reserved"
-)
+reservedMachine = null
 
-reservedMachine = myReserved ? myReserved.machine_number : null
+for(const machine of machines){
+
+const queueRes = await fetch(`http://localhost:3000/queue/${machine.machine_number}`)
+const queue = await queueRes.json()
+
+machine.queue_count = queue.length
+
+const myQueueIndex = queue.findIndex(q => String(q.room_number) === String(currentUser))
+
+if(myQueueIndex !== -1){
+
+reservedMachine = machine.machine_number
+
+if(myQueueIndex === 0 && machine.status === "available"){
+startCountdown(machine.machine_number)
+}
+
+}
+
+}
 
 machines.forEach(machine => {
 
@@ -70,13 +282,26 @@ else if(machine.status === "reserved") statusText = "Reserved"
 else if(machine.status === "in_use") statusText = "In Use"
 else if(machine.status === "broken") statusText = "Broken"
 
+let reserveDisabled = ""
+
+if(reservedMachine && reservedMachine !== machine.machine_number){
+reserveDisabled = "disabled"
+}
+
+if(machine.status === "broken"){
+reserveDisabled = "disabled"
+}
+
+let cancelDisabled = ""
+
+if(reservedMachine !== machine.machine_number){
+cancelDisabled = "disabled"
+}
+
 const card = document.createElement("div")
 card.className = "machine-card"
 
-if(
-(reservedMachine && reservedMachine !== machine.machine_number) ||
-machine.status === "broken"
-){
+if(machine.status === "broken"){
 card.classList.add("locked-machine")
 }
 
@@ -92,31 +317,35 @@ ${statusText}
 </span>
 </p>
 
+<p>Current User : ${machine.current_user_name || "-"}</p>
+
+<p>Queue : ${machine.queue_count}</p>
+
 <div class="machine-buttons">
 
-<button 
+<button
 class="reserve-btn"
 onclick="openReservePopup(${machine.machine_number})"
-${machine.status !== "available" || reservedMachine ? "disabled" : ""}
+${reserveDisabled}
 >
-Reserve
-</button>
 
-<button 
+Reserve </button>
+
+<button
 class="cancel-btn"
 onclick="openCancelPopup(${machine.machine_number})"
-${machine.current_user_name != currentUser ? "disabled" : ""}
+${cancelDisabled}
 >
-Cancel
-</button>
 
-<button 
+Cancel </button>
+
+<button
 class="report-btn"
 onclick="openReportPopup(${machine.machine_number})"
 ${machine.status === "broken" ? "disabled" : ""}
 >
-Report
-</button>
+
+Report </button>
 
 </div>
 
@@ -136,9 +365,16 @@ isLoading = false
 
 }
 
+// ============================
+// RESERVE
+// ============================
+
 function openReservePopup(machineNumber){
 
-if(reservedMachine) return
+if(reservedMachine && reservedMachine !== machineNumber){
+alert("You already reserved another machine")
+return
+}
 
 selectedMachine = machineNumber
 
@@ -167,9 +403,9 @@ reserveMachine(selectedMachine)
 
 async function reserveMachine(machineNumber){
 
-if(reservedMachine) return
+try{
 
-await fetch("http://localhost:3000/reserve",{
+const res = await fetch("http://localhost:3000/reserve",{
 
 method:"POST",
 
@@ -179,15 +415,35 @@ headers:{
 
 body:JSON.stringify({
 machine_number:machineNumber,
-user:currentUser,
 room_number:currentUser
 })
 
 })
 
+const data = await res.json()
+
+if(!res.ok){
+alert(data.message || "Reserve failed")
+return
+}
+
+if(data.queue_position === 1){
+startCountdown(machineNumber)
+}
+
 loadMachines()
 
+}catch(err){
+
+console.log("Reserve error:",err)
+
 }
+
+}
+
+// ============================
+// CANCEL
+// ============================
 
 function openCancelPopup(machineNumber){
 
@@ -228,6 +484,8 @@ cancelReservation(cancelMachineNumber)
 
 async function cancelReservation(machineNumber){
 
+try{
+
 await fetch("http://localhost:3000/cancel",{
 
 method:"POST",
@@ -237,16 +495,34 @@ headers:{
 },
 
 body:JSON.stringify({
-machine_number:machineNumber
+machine_number:machineNumber,
+room_number:currentUser
 })
 
 })
 
 reservedMachine = null
 
-loadMachines()
+clearInterval(countdownInterval)
+countdownInterval = null
+
+await stopCamera()
+
+document.getElementById("countdownPopup").style.display = "none"
+
+await loadMachines()
+
+}catch(err){
+
+console.log("Cancel error:",err)
 
 }
+
+}
+
+// ============================
+// REPORT
+// ============================
 
 function openReportPopup(machineNumber){
 
@@ -296,6 +572,10 @@ popup.style.display = "none"
 }
 
 }
+
+// ============================
+// LOGOUT
+// ============================
 
 function setupLogout(){
 

@@ -265,6 +265,9 @@ VALUES (?,?,?)`,
 [machine_number,room_number,nextPos]
 )
 
+// ⭐ ส่งตำแหน่งคิวกลับไปให้ frontend
+const queue_position = nextPos
+
 const [machines]: any = await pool.query(
 "SELECT * FROM machines WHERE machine_number=? LIMIT 1",
 [machine_number]
@@ -282,7 +285,43 @@ WHERE machine_number=?`,
 
 }
 
-return c.json({message:"Reserve success"})
+return c.json({
+message:"Reserve success",
+queue_position
+})
+
+})
+
+// =====================
+// CONFIRM MACHINE (QR)
+// =====================
+
+app.post('/confirm-machine', async (c) => {
+
+const body = await c.req.json()
+const { machine_number, room_number } = body
+
+const [rows]: any = await pool.query(
+`SELECT current_user_name FROM machines WHERE machine_number=?`,
+[machine_number]
+)
+
+if(rows.length === 0){
+return c.json({message:"Machine not found"},404)
+}
+
+if(String(rows[0].current_user_name) !== String(room_number)){
+return c.json({message:"Not your reservation"},403)
+}
+
+await pool.query(
+`UPDATE machines
+SET status='in_use'
+WHERE machine_number=?`,
+[machine_number]
+)
+
+return c.json({message:"Machine confirmed. Washing started"})
 
 })
 
@@ -354,14 +393,11 @@ app.post('/admin/reset', async (c) => {
 const body = await c.req.json()
 const { machine_number } = body
 
-// ลบ queue ทั้งหมด
 await pool.query(
-`DELETE FROM machine_queue
-WHERE machine_number=?`,
+`DELETE FROM machine_queue WHERE machine_number=?`,
 [machine_number]
 )
 
-// รีเซ็ตสถานะเครื่อง
 await pool.query(
 `UPDATE machines
 SET status='available',
