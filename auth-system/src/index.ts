@@ -13,12 +13,15 @@ app.use('*', cors())
 // =====================
 
 const pool = mysql.createPool({
-  host: "localhost",
+  host: "nozomi.proxy.rlwy.net",
+  port: 13659,
   user: "root",
-  password: "Root12345678",
-  database: "laundry_system"
+  password: "FmRLGTOfQkwyZLggglGsjEpGmHKFpKXy",
+  database: "railway",
+  ssl: {
+    rejectUnauthorized: false
+  }
 })
-
 // =====================
 // LOGIN
 // =====================
@@ -647,7 +650,7 @@ return c.text('Laundry API')
 
 serve({
 fetch: app.fetch,
-port: 3000
+port: process.env.PORT || 3000
 }, (info) => {
 
 console.log(`Server running http://localhost:${info.port}`)
