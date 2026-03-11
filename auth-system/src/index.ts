@@ -567,6 +567,73 @@ WHERE machine_number=?`,
 }
 
 // =====================
+// CANCEL RESERVATION
+// =====================
+
+app.post("/cancel", async (c) => {
+
+const body = await c.req.json()
+const { machine_number, room_number } = body
+
+// ลบออกจาก queue
+await pool.query(
+`DELETE FROM machine_queue
+WHERE machine_number=? AND room_number=?`,
+[machine_number,room_number]
+)
+
+// reset position queue
+await pool.query(`SET @pos := 0`)
+
+await pool.query(
+`UPDATE machine_queue
+SET position = (@pos := @pos + 1)
+WHERE machine_number=?
+ORDER BY position ASC`,
+[machine_number]
+)
+
+// เช็คคิวคนถัดไป
+const [next]: any = await pool.query(
+`SELECT room_number
+FROM machine_queue
+WHERE machine_number=?
+ORDER BY position ASC
+LIMIT 1`,
+[machine_number]
+)
+
+if(next.length > 0){
+
+await pool.query(
+`UPDATE machines
+SET status='available',
+current_user_name=?,
+start_time=NULL,
+end_time=NULL
+WHERE machine_number=?`,
+[next[0].room_number,machine_number]
+)
+
+}else{
+
+await pool.query(
+`UPDATE machines
+SET status='available',
+current_user_name=NULL,
+start_time=NULL,
+end_time=NULL
+WHERE machine_number=?`,
+[machine_number]
+)
+
+}
+
+return c.json({message:"Reservation cancelled"})
+
+})
+
+// =====================
 // HOME
 // =====================
 

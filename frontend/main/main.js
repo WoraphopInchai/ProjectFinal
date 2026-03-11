@@ -1,3 +1,14 @@
+const token = localStorage.getItem("token")
+const role = localStorage.getItem("role")
+
+if(!token){
+window.location.href = "../login/login.html"
+}
+
+if(role === "admin"){
+window.location.href = "../admin/admin-dashboard.html"
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 
 loadUserInfo()
@@ -198,9 +209,11 @@ room_number:currentUser
 })
 
 reservedMachine = null
-loadMachines()
+myQueuePosition = null
 queueConfirmedMachine = null
+countdownMachine = null
 
+loadMachines()
 }
 
 }
@@ -299,7 +312,9 @@ room_number:currentUser
 })
 
 reservedMachine = null
+myQueuePosition = null
 queueConfirmedMachine = null
+countdownMachine = null
 
 loadMachines()
 
@@ -395,7 +410,7 @@ showQueueNotification(machine.machine_number)
 
 if(machine.status === "reserved" && String(machine.current_user_name) === String(currentUser)){
 
-if(!countdownInterval){
+if(!countdownInterval && queueConfirmedMachine === machine.machine_number){
 startCountdown(machine.machine_number)
 }
 

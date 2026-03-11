@@ -1,3 +1,14 @@
+const token = localStorage.getItem("token")
+const role = localStorage.getItem("role")
+
+if(!token){
+window.location.href = "../login/login.html"
+}
+
+if(role !== "admin"){
+window.location.href = "../main/main.html"
+}
+
 let machineIdToDelete = null
 let machinesData = []
 let currentFilter = "all"
