@@ -141,13 +141,28 @@ startCountdown(queueMachine)
 
 if(cancelBtn){
 
-cancelBtn.onclick = () => {
+cancelBtn.onclick = async () => {
 
 clearTimeout(queueTimeout)
 
 popup.style.display = "none"
 
 queuePopupShown = false
+
+await fetch("http://localhost:3000/cancel",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({
+machine_number: queueMachine,
+room_number: currentUser
+})
+})
+
+reservedMachine = null
+myQueuePosition = null
+queueConfirmedMachine = null
+
+loadMachines()
 
 }
 
@@ -284,6 +299,7 @@ room_number:currentUser
 })
 
 reservedMachine = null
+queueConfirmedMachine = null
 
 loadMachines()
 

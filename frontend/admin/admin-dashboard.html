@@ -38,7 +38,6 @@ Welcome<br>
 
 <div id="machinePage">
 
-<!-- FILTER -->
 <div class="tabs">
 
 <button class="tab active" data-filter="all">All</button>
@@ -48,7 +47,6 @@ Welcome<br>
 
 </div>
 
-<!-- ADD MACHINE -->
 <div class="actions">
 
 <button id="addMachineBtn" class="add-machine-btn">
@@ -64,7 +62,7 @@ Welcome<br>
 
 <!-- ================= USER PAGE ================= -->
 
-<div id="userPage">
+<div id="userPage" style="display:none;">
 
 <h3>Add User</h3>
 
@@ -102,6 +100,21 @@ Password
 </div>
 
 
+<!-- ================= REPORT PAGE ================= -->
+
+<div id="notificationPage" style="display:none;">
+
+<h3>User Reports</h3>
+
+<div id="reportList">
+
+<!-- report จะถูกสร้างจาก JS -->
+
+</div>
+
+</div>
+
+
 <!-- ================= BOTTOM NAV ================= -->
 
 <nav class="bottom-nav">
@@ -118,13 +131,14 @@ Password
 
 <a class="nav-item" id="notiBtn">
 <i class="fa-solid fa-bell"></i>
-<span>Notifications</span>
+<span>Reports</span>
 </a>
 
 </nav>
 
 
 <!-- ADD MACHINE MODAL -->
+
 <div id="addModal" class="modal">
 <div class="modal-content">
 
@@ -142,6 +156,7 @@ Password
 
 
 <!-- DELETE MACHINE MODAL -->
+
 <div id="deleteModal" class="modal">
 <div class="modal-content">
 
@@ -157,6 +172,7 @@ Password
 
 
 <!-- LOGOUT POPUP -->
+
 <div id="logoutPopup" class="modal">
 <div class="modal-content">
 
@@ -169,6 +185,7 @@ Password
 
 </div>
 </div>
+
 
 <script src="admin-dashboard.js"></script>
 

@@ -1,20 +1,24 @@
 /* RESET */
+ 
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family: Arial, Helvetica, sans-serif;
+font-family:Arial, Helvetica, sans-serif;
 }
  
 /* BODY */
+ 
 body{
 background:#eef1f7;
 display:flex;
 flex-direction:column;
 min-height:100vh;
+overflow-x:hidden;
 }
  
 /* HEADER */
+ 
 .top-bar{
 background:#4a6cf7;
 color:white;
@@ -48,10 +52,7 @@ align-items:center;
 gap:12px;
 }
  
-#clock{
-font-weight:bold;
-font-size:18px;
-}
+/* LOGOUT BUTTON */
  
 #logoutBtn{
 padding:7px 14px;
@@ -69,32 +70,37 @@ background:#f1f1f1;
 }
  
 /* CONTAINER */
+ 
 .queue-container{
 flex:1;
 display:flex;
 justify-content:center;
-align-items:center;
-padding:30px 20px;
+align-items:flex-start;
+padding:40px 20px;
 }
  
 /* CARD */
+ 
 .queue-card{
 width:100%;
 max-width:380px;
  
 background:white;
-border-radius:16px;
-padding:25px;
+border-radius:18px;
+padding:24px;
  
-border:2px solid #e5e7eb;
+border:1px solid #e8ecf2;
  
-box-shadow:0 10px 25px rgba(0,0,0,0.08);
-transition:0.25s;
+box-shadow:0 12px 28px rgba(0,0,0,0.08);
 }
  
-.queue-card:hover{
-transform:translateY(-3px);
-box-shadow:0 15px 30px rgba(0,0,0,0.12);
+/* HR */
+ 
+.queue-card hr{
+border:none;
+height:1px;
+background:#eef1f5;
+margin:16px 0;
 }
  
 /* LOGO + TITLE */
@@ -103,16 +109,18 @@ box-shadow:0 15px 30px rgba(0,0,0,0.12);
 display:flex;
 align-items:center;
 gap:12px;
-margin-bottom:15px;
+margin-bottom:18px;
 }
  
 .logo{
-width:55px;
+width:50px;
 }
  
 .logo-title h2{
-font-size:17px;
+font-size:18px;
+font-weight:700;
 color:#4a6cf7;
+letter-spacing:0.3px;
 }
  
 .logo-title p{
@@ -120,141 +128,46 @@ font-size:12px;
 color:#777;
 }
  
-/* QUEUE INFO */
+/* NOTIFICATION BOX */
  
-.queue-info{
+.noti-box{
 display:flex;
-justify-content:space-around;
-align-items:center;
-text-align:center;
-margin:20px 0;
-}
+gap:14px;
+padding:16px;
+align-items:flex-start;
  
-.box p{
-font-size:12px;
-color:#777;
-}
- 
-.box h1{
-font-size:32px;
-margin-top:6px;
-}
- 
-.line{
-width:1px;
-height:40px;
-background:#ddd;
-}
- 
-/* DETAILS */
- 
-.details{
-margin-top:15px;
-}
- 
-.details p{
-font-size:13px;
-color:#666;
-}
- 
-.details h3{
-margin:10px 0 5px;
-}
- 
-.warning{
-color:#ef4444;
-font-size:11px;
-}
- 
-/* ================= POPUP ================= */
- 
-.popup{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.45);
-display:none;
-justify-content:center;
-align-items:center;
-z-index:1000;
-}
- 
-.popup-card{
-background:white;
-width:90%;
-max-width:380px;
-padding:28px;
-border-radius:18px;
-box-shadow:0 18px 40px rgba(0,0,0,0.25);
-text-align:center;
-animation:popupFade 0.25s ease;
-}
- 
-/* POPUP HEADER */
- 
-.popup-header h2{
-font-size:20px;
-margin-bottom:8px;
-}
- 
-.popup-header p{
-font-size:14px;
-color:#666;
-margin-bottom:15px;
-}
- 
-#countdown{
-color:#ef4444;
-font-size:22px;
-margin-bottom:18px;
-}
- 
-/* CAMERA */
- 
-.camera-box{
-background:#000;
-border-radius:14px;
-padding:10px;
-margin-bottom:20px;
-}
- 
-#qr-reader{
-width:100%;
 border-radius:12px;
-overflow:hidden;
-}
- 
-/* BUTTON */
- 
-.cancel-btn{
-width:100%;
-padding:12px;
-border:none;
-border-radius:10px;
-background:#e5e7eb;
-color:#333;
-font-weight:bold;
-cursor:pointer;
 transition:0.2s;
+cursor:pointer;
 }
  
-.cancel-btn:hover{
-background:#d1d5db;
+.noti-box:hover{
+background:#f7f9ff;
 }
  
-/* POPUP ANIMATION */
+.noti-box img{
+width:40px;
+height:40px;
+border-radius:10px;
  
-@keyframes popupFade{
-from{
-transform:scale(0.9);
-opacity:0;
+background:#eef2ff;
+padding:6px;
+ 
+box-shadow:0 3px 8px rgba(0,0,0,0.08);
 }
-to{
-transform:scale(1);
-opacity:1;
+ 
+.noti-box h4{
+margin:0;
+font-size:14px;
+font-weight:600;
+color:#1f2937;
 }
+ 
+.noti-box p{
+margin-top:4px;
+font-size:12.5px;
+color:#6b7280;
+line-height:1.45;
 }
  
 /* BOTTOM NAV */
@@ -290,13 +203,13 @@ color:#4a6cf7;
 /* ================= LOGOUT POPUP ================= */
  
 .popup-overlay{
+display:none;
 position:fixed;
 top:0;
 left:0;
 width:100%;
 height:100%;
 background:rgba(0,0,0,0.45);
-display:none;
 justify-content:center;
 align-items:center;
 z-index:2000;
@@ -356,6 +269,18 @@ transition:0.2s;
 background:#d1d5db;
 }
  
+/* POPUP ANIMATION */
+ 
+@keyframes popupFade{
+from{
+transform:scale(0.9);
+opacity:0;
+}
+to{
+transform:scale(1);
+opacity:1;
+}
+}
  
 /* ================= BUBBLE BACKGROUND ================= */
  
@@ -371,15 +296,15 @@ z-index:-1;
  
 .bubbles span{
 position:absolute;
-bottom:-50px;
+bottom:-60px;
 width:40px;
 height:40px;
 background:rgba(11, 178, 233, 0.35);
 border-radius:50%;
-animation:bubble 15s linear infinite;
+animation:bubble 18s linear infinite;
 }
  
-/* ขนาดสุ่ม */
+/* RANDOM SIZE */
  
 .bubbles span:nth-child(1){left:10%;width:20px;height:20px;animation-duration:12s;}
 .bubbles span:nth-child(2){left:20%;animation-duration:18s;}
@@ -392,7 +317,7 @@ animation:bubble 15s linear infinite;
 .bubbles span:nth-child(9){left:90%;width:26px;height:26px;animation-duration:13s;}
 .bubbles span:nth-child(10){left:15%;animation-duration:19s;}
  
-/* animation */
+/* BUBBLE ANIMATION */
  
 @keyframes bubble{
 0%{
@@ -403,7 +328,51 @@ opacity:0.6;
 opacity:0.8;
 }
 100%{
-transform:translateY(-110vh) scale(1.3);
+transform:translateY(-110vh) scale(1.4);
 opacity:0;
 }
+}
+ 
+/* MOBILE */
+ 
+@media (max-width:480px){
+ 
+.queue-card{
+max-width:100%;
+border-radius:16px;
+}
+ 
+.logo-title h2{
+font-size:16px;
+}
+ 
+}
+.bottom-nav{
+position:fixed;
+bottom:0;
+width:100%;
+background:white;
+display:flex;
+justify-content:space-around;
+align-items:center;
+padding:8px 0;
+box-shadow:0 -2px 10px rgba(0,0,0,0.1);
+}
+ 
+.bottom-nav a{
+display:flex;
+flex-direction:column;
+align-items:center;
+text-decoration:none;
+color:#555;
+font-size:12px;
+}
+ 
+.bottom-nav i{
+font-size:24px;
+margin-bottom:3px;
+}
+ 
+.bottom-nav a:hover{
+color:#4a6cf7;
 }

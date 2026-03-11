@@ -439,3 +439,12 @@ border-radius:16px;
 }
 
 /* เมื่อกี้คอมมิดผิดลืมใส่ชื่อคอมมิต ใส่ใหม่ๆ */
+
+
+.noti-item{
+background:#f3f4f6;
+padding:10px;
+border-radius:8px;
+margin-bottom:8px;
+font-size:14px;
+}

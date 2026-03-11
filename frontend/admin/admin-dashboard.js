@@ -2,6 +2,8 @@ let machineIdToDelete = null
 let machinesData = []
 let currentFilter = "all"
 
+let reportsData = []
+
 // POPUPS
 let deleteModal
 let logoutPopup
@@ -10,9 +12,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 loadMachines()
 loadUsers()
+loadReports()
 
-// รีโหลดข้อมูลทุก 3 วินาที
-setInterval(loadMachines, 3000)
+setInterval(loadMachines,3000)
+setInterval(loadReports,5000)
 
 const addBtn = document.getElementById("addMachineBtn")
 const addModal = document.getElementById("addModal")
@@ -45,10 +48,6 @@ currentFilter = tab.dataset.filter
 
 renderMachines()
 
-document.getElementById("machineList").scrollIntoView({
-behavior:"smooth"
-})
-
 })
 
 })
@@ -57,20 +56,20 @@ behavior:"smooth"
 // ADD MACHINE
 // ========================
 
-addBtn.addEventListener("click", () => {
+addBtn?.addEventListener("click", () => {
 
 addModal.style.display = "flex"
 machineInput.value = ""
 
 })
 
-addCancel.addEventListener("click", () => {
+addCancel?.addEventListener("click", () => {
 
 addModal.style.display = "none"
 
 })
 
-addConfirm.addEventListener("click", async () => {
+addConfirm?.addEventListener("click", async () => {
 
 const value = machineInput.value.trim()
 const machineNumber = parseInt(value)
@@ -110,14 +109,14 @@ console.log("เพิ่มเครื่องไม่สำเร็จ",er
 // DELETE MACHINE
 // ========================
 
-deleteCancel.addEventListener("click",()=>{
+deleteCancel?.addEventListener("click",()=>{
 
 deleteModal.style.display="none"
 machineIdToDelete = null
 
 })
 
-deleteConfirm.addEventListener("click", async ()=>{
+deleteConfirm?.addEventListener("click", async ()=>{
 
 if(machineIdToDelete === null) return
 
@@ -175,6 +174,8 @@ function renderMachines(){
 
 const list = document.getElementById("machineList")
 
+if(!list) return
+
 list.innerHTML = ""
 
 let filtered = machinesData
@@ -223,10 +224,6 @@ statusClass = "broken"
 
 let room = "-"
 
-if(machine.room_number){
-room = machine.room_number
-}
-
 if(machine.current_user_name){
 room = machine.current_user_name
 }
@@ -253,7 +250,6 @@ ${statusText}
 
 `
 
-// แจ้งเสีย
 div.querySelector(".report").addEventListener("click", async ()=>{
 
 await fetch(`http://localhost:3000/machines/${machine.id}`,{
@@ -266,17 +262,13 @@ loadMachines()
 
 })
 
-// ========================
-// RESET MACHINE (แก้ตรงนี้)
-// ========================
-
 div.querySelector(".reset").addEventListener("click", async ()=>{
 
 if(!confirm("ต้องการรีเซ็ตเครื่องนี้หรือไม่")) return
 
 try{
 
-await fetch("http://localhost:3000/admin/reset",{
+const res = await fetch("http://localhost:3000/admin/reset",{
 method:"POST",
 headers:{ "Content-Type":"application/json" },
 body:JSON.stringify({
@@ -284,7 +276,12 @@ machine_number: machine.machine_number
 })
 })
 
-loadMachines()
+if(!res.ok){
+alert("รีเซ็ตเครื่องไม่สำเร็จ")
+return
+}
+
+await loadMachines()
 
 }catch(err){
 
@@ -294,13 +291,86 @@ console.log("รีเซ็ตเครื่องไม่สำเร็จ"
 
 })
 
-// ลบเครื่อง
 div.querySelector(".delete").addEventListener("click",()=>{
 
 machineIdToDelete = machine.id
 deleteModal.style.display="flex"
 
 })
+
+list.appendChild(div)
+
+})
+
+}
+
+// ========================
+// REPORT SYSTEM
+// ========================
+
+async function loadReports(){
+
+try{
+
+const res = await fetch("http://localhost:3000/reports")
+reportsData = await res.json()
+
+renderReports()
+
+}catch(err){
+
+console.log("โหลด report ไม่สำเร็จ",err)
+
+}
+
+}
+
+function renderReports(){
+
+const list = document.getElementById("reportList")
+if(!list) return
+
+list.innerHTML = ""
+
+reportsData.forEach(r => {
+
+const div = document.createElement("div")
+div.className = "report-card"
+
+const time = new Date(r.created_at).toLocaleString()
+
+div.innerHTML = `
+
+<div class="report-header">
+<b>Machine #${r.machine_number}</b>
+<span class="report-room">${r.report_by}</span>
+</div>
+
+<div class="report-message">
+${r.problem}
+</div>
+
+<div class="report-time">
+${time}
+</div>
+
+<div class="report-actions">
+<button class="delete-btn">Delete</button>
+</div>
+
+`
+
+div.querySelector(".delete-btn").onclick = async ()=>{
+
+if(!confirm("ต้องการลบ report นี้หรือไม่")) return
+
+await fetch(`http://localhost:3000/reports/${r.id}`,{
+method:"DELETE"
+})
+
+loadReports()
+
+}
 
 list.appendChild(div)
 
@@ -320,6 +390,8 @@ const res = await fetch("http://localhost:3000/users")
 const users = await res.json()
 
 const table = document.getElementById("userTable")
+
+if(!table) return
 
 table.innerHTML = ""
 
@@ -350,6 +422,10 @@ console.log("โหลด user ไม่สำเร็จ",err)
 
 }
 
+// ========================
+// USER CRUD
+// ========================
+
 async function addUser(){
 
 const room = document.getElementById("room").value
@@ -361,7 +437,8 @@ alert("กรอกข้อมูลให้ครบ")
 return
 }
 
-await fetch("http://localhost:3000/users",{
+// 🔧 แก้ตรงนี้
+await fetch("http://localhost:3000/register",{
 method:"POST",
 headers:{ "Content-Type":"application/json" },
 body:JSON.stringify({ room,email,password })
@@ -393,7 +470,8 @@ if(!newRoom || !newEmail) return
 
 const bodyData = {
 room:newRoom,
-email:newEmail
+email:newEmail,
+role:"user"
 }
 
 if(newPassword && newPassword.trim() !== ""){
@@ -420,15 +498,15 @@ const logoutBtn = document.getElementById("logoutBtn")
 const confirmBtn = document.getElementById("confirmLogout")
 const cancelBtn = document.getElementById("cancelLogout")
 
-logoutBtn.addEventListener("click", () => {
+logoutBtn?.addEventListener("click", () => {
 logoutPopup.style.display = "flex"
 })
 
-cancelBtn.addEventListener("click", () => {
+cancelBtn?.addEventListener("click", () => {
 logoutPopup.style.display = "none"
 })
 
-confirmBtn.addEventListener("click", () => {
+confirmBtn?.addEventListener("click", () => {
 window.location.href = "../login/login.html"
 })
 
@@ -440,16 +518,26 @@ window.location.href = "../login/login.html"
 
 const machinePage = document.getElementById("machinePage")
 const userPage = document.getElementById("userPage")
+const notificationPage = document.getElementById("notificationPage")
 
 document.getElementById("homeBtn").onclick = () =>{
 machinePage.style.display="block"
 userPage.style.display="none"
+notificationPage.style.display="none"
 }
 
 document.getElementById("userBtn").onclick = () =>{
 machinePage.style.display="none"
 userPage.style.display="block"
+notificationPage.style.display="none"
 loadUsers()
+}
+
+document.getElementById("notiBtn").onclick = () =>{
+machinePage.style.display="none"
+userPage.style.display="none"
+notificationPage.style.display="block"
+loadReports()
 }
 
 const navItems = document.querySelectorAll(".nav-item")

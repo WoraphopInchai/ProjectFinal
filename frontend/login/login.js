@@ -32,6 +32,7 @@ localStorage.setItem("token", data.token)
 localStorage.setItem("role", data.role || "")
 localStorage.setItem("room_number", data.room_number || "")
 localStorage.setItem("email", data.email || "")
+localStorage.setItem("user_id", data.user_id || "") // ⭐ เพิ่มบรรทัดนี้
 
 if(data.role && data.role.toLowerCase() === "admin"){
 
