@@ -649,12 +649,12 @@ return c.text('Laundry API')
 // =====================
 
 serve({
-fetch: app.fetch,
-port: process.env.PORT || 3000
+  fetch: app.fetch,
+  port: Number(process.env.PORT) || 3000
 }, (info) => {
 
-console.log(`Server running http://localhost:${info.port}`)
+  console.log(`Server running http://localhost:${info.port}`)
 
-setInterval(autoFinishMachines,5000)
+  setInterval(autoFinishMachines,5000)
 
 })
