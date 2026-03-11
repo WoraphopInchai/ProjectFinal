@@ -2,7 +2,7 @@
   "dependencies": {
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.1.0",
-    "mysql2": "^3.19.0"
+    "mysql2": "^3.19.1"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10"
