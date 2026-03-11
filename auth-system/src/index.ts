@@ -106,6 +106,44 @@ const [rows]: any = await pool.query(
 return c.json(rows)
 
 })
+// =====================
+// DELETE USER
+// =====================
+
+app.delete('/users/:id', async (c) => {
+
+const id = c.req.param("id")
+
+await pool.query(
+"DELETE FROM users WHERE id=?",
+[id]
+)
+
+return c.json({message:"User deleted"})
+
+})
+
+// =====================
+// UPDATE USER
+// =====================
+
+app.put('/users/:id', async (c) => {
+
+const id = c.req.param("id")
+const body = await c.req.json()
+
+const { room,email,password,role } = body
+
+await pool.query(
+`UPDATE users
+SET room=?,email=?,password=?,role=?
+WHERE id=?`,
+[room,email,password,role,id]
+)
+
+return c.json({message:"User updated"})
+
+})
 
 // =====================
 // GET MACHINES
@@ -241,6 +279,66 @@ return c.json({ message: "Machine deleted" })
 })
 
 // =====================
+// REPORT MACHINE
+// =====================
+
+app.post('/report', async (c) => {
+
+const body = await c.req.json()
+const { machine_number, message } = body
+
+await pool.query(
+`INSERT INTO reports (machine_number,problem,report_by)
+VALUES (?,?,?)`,
+[machine_number,message,"User"]
+)
+
+return c.json({message:"Report saved"})
+
+})
+
+// =====================
+// GET REPORTS
+// =====================
+
+app.get('/reports', async (c) => {
+
+const [rows]: any = await pool.query(
+`SELECT * FROM reports
+ORDER BY created_at DESC`
+)
+
+return c.json(rows)
+
+})
+
+// =====================
+// DELETE REPORT
+// =====================
+
+app.delete('/reports/:id', async (c) => {
+
+const id = c.req.param("id")
+
+const [exist]: any = await pool.query(
+"SELECT id FROM reports WHERE id=?",
+[id]
+)
+
+if(exist.length === 0){
+return c.json({message:"Report not found"},404)
+}
+
+await pool.query(
+"DELETE FROM reports WHERE id=?",
+[id]
+)
+
+return c.json({message:"Report deleted"})
+
+})
+
+// =====================
 // ADMIN RESET MACHINE
 // =====================
 
@@ -253,13 +351,11 @@ if(!machine_number){
 return c.json({message:"machine_number required"},400)
 }
 
-// ลบคิวทั้งหมด
 await pool.query(
 `DELETE FROM machine_queue WHERE machine_number=?`,
 [machine_number]
 )
 
-// รีเซ็ตเครื่อง
 await pool.query(
 `UPDATE machines
 SET status='available',
@@ -366,84 +462,6 @@ WHERE machine_number=?`,
 )
 
 return c.json({message:"Machine confirmed. Washing started"})
-
-})
-
-// =====================
-// CANCEL RESERVATION
-// =====================
-
-app.post('/cancel', async (c) => {
-
-const body = await c.req.json()
-const { machine_number, room_number } = body
-
-const [machineRows]: any = await pool.query(
-`SELECT current_user_name FROM machines WHERE machine_number=?`,
-[machine_number]
-)
-
-if(machineRows.length === 0){
-return c.json({message:"Machine not found"},404)
-}
-
-const currentUser = machineRows[0].current_user_name
-
-await pool.query(
-`DELETE FROM machine_queue
-WHERE machine_number=? AND room_number=?`,
-[machine_number,room_number]
-)
-
-await pool.query(`SET @pos := 0`)
-
-await pool.query(
-`UPDATE machine_queue
-SET position = (@pos := @pos + 1)
-WHERE machine_number=?
-ORDER BY position ASC`,
-[machine_number]
-)
-
-if(String(currentUser) === String(room_number)){
-
-const [next]: any = await pool.query(
-`SELECT room_number FROM machine_queue
-WHERE machine_number=?
-ORDER BY position ASC
-LIMIT 1`,
-[machine_number]
-)
-
-if(next.length > 0){
-
-await pool.query(
-`UPDATE machines
-SET status='reserved',
-current_user_name=?,
-start_time=NULL,
-end_time=NULL
-WHERE machine_number=?`,
-[next[0].room_number,machine_number]
-)
-
-}else{
-
-await pool.query(
-`UPDATE machines
-SET status='available',
-current_user_name=NULL,
-start_time=NULL,
-end_time=NULL
-WHERE machine_number=?`,
-[machine_number]
-)
-
-}
-
-}
-
-return c.json({ message: "Reservation cancelled" })
 
 })
 
