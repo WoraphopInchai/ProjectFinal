@@ -8,8 +8,10 @@ setupReservePopup()
 setupReportPopup()
 setupCancelPopup()
 setupCountdownPopup()
+setupQueuePopup()
 
-setInterval(loadMachines,3000)
+setInterval(loadMachines,10000)
+setInterval(updateLiveTimers,1000)
 
 })
 
@@ -37,17 +39,22 @@ let reservedMachine = null
 let reportMachineNumber = null
 let isLoading = false
 
+let myQueuePosition = null
+
 const currentUser = localStorage.getItem("room_number")
 
-// ============================
-// COUNTDOWN SYSTEM
-// ============================
+let machineEndTimes = {}
 
 let countdownInterval = null
-let countdownSeconds = 300
+let countdownSeconds = 30
 let countdownMachine = null
 
 let qrScanner = null
+
+let queueMachine = null
+let queuePopupShown = false
+let queueTimeout = null
+let queueConfirmedMachine = null
 
 async function stopCamera(){
 if(qrScanner){
@@ -56,6 +63,96 @@ await qrScanner.stop()
 }catch(e){}
 qrScanner = null
 }
+}
+
+function showQueueNotification(machineNumber){
+
+if(queuePopupShown) return
+
+queuePopupShown = true
+queueMachine = machineNumber
+
+const popup = document.getElementById("queuePopup")
+const machineText = document.getElementById("queueMachine")
+
+if(!popup || !machineText) return
+
+machineText.innerText = machineNumber
+
+popup.style.display = "flex"
+
+playNotificationSound()
+
+queueTimeout = setTimeout(async () => {
+
+popup.style.display = "none"
+queuePopupShown = false
+
+alert("You missed your turn")
+
+await fetch("http://localhost:3000/cancel",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({
+machine_number:machineNumber,
+room_number:currentUser
+})
+})
+
+loadMachines()
+
+},120000)
+
+}
+
+function playNotificationSound(){
+
+const sound = document.getElementById("notifySound")
+
+if(sound){
+sound.play().catch(()=>{})
+}
+
+}
+
+function setupQueuePopup(){
+
+const confirmBtn = document.getElementById("confirmQueueBtn")
+const cancelBtn = document.getElementById("cancelQueueBtn")
+const popup = document.getElementById("queuePopup")
+
+if(confirmBtn){
+
+confirmBtn.onclick = () => {
+
+clearTimeout(queueTimeout)
+
+popup.style.display = "none"
+
+queuePopupShown = false
+
+queueConfirmedMachine = queueMachine
+
+startCountdown(queueMachine)
+
+}
+
+}
+
+if(cancelBtn){
+
+cancelBtn.onclick = () => {
+
+clearTimeout(queueTimeout)
+
+popup.style.display = "none"
+
+queuePopupShown = false
+
+}
+
+}
+
 }
 
 function setupCountdownPopup(){
@@ -68,6 +165,7 @@ if(cancelBtn){
 cancelBtn.onclick = async () => {
 
 clearInterval(countdownInterval)
+countdownInterval = null
 
 await stopCamera()
 
@@ -76,23 +174,17 @@ document.getElementById("countdownPopup").style.display = "none"
 if(countdownMachine){
 
 await fetch("http://localhost:3000/cancel",{
-
 method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
+headers:{ "Content-Type":"application/json" },
 body:JSON.stringify({
 machine_number:countdownMachine,
 room_number:currentUser
 })
-
 })
 
 reservedMachine = null
-
 loadMachines()
+queueConfirmedMachine = null
 
 }
 
@@ -110,43 +202,33 @@ qrScanner = new Html5Qrcode("qr-reader")
 
 qrScanner.start(
 { facingMode: "environment" },
-{
-fps:10,
-qrbox:250
-},
+{ fps:10, qrbox:250 },
 async (decodedText) => {
 
-console.log("QR:",decodedText)
-
 if(decodedText !== "machine_" + countdownMachine){
-
 alert("Wrong machine")
 return
-
 }
 
 await fetch("http://localhost:3000/confirm-machine",{
-
 method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
+headers:{ "Content-Type":"application/json" },
 body:JSON.stringify({
 machine_number: countdownMachine,
 room_number: currentUser
 })
-
 })
 
 await stopCamera()
 
 clearInterval(countdownInterval)
+countdownInterval = null
 
 document.getElementById("countdownPopup").style.display = "none"
 
 alert("Machine confirmed. Washing started")
+
+queueConfirmedMachine = null
 
 loadMachines()
 
@@ -171,8 +253,7 @@ if(!popup || !timer) return
 popup.style.display = "flex"
 
 countdownMachine = machineNumber
-
-countdownSeconds = 300
+countdownSeconds = 30
 
 updateTimer(timer)
 
@@ -194,18 +275,12 @@ popup.style.display = "none"
 alert("Reservation expired")
 
 await fetch("http://localhost:3000/cancel",{
-
 method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
+headers:{ "Content-Type":"application/json" },
 body:JSON.stringify({
 machine_number:machineNumber,
 room_number:currentUser
 })
-
 })
 
 reservedMachine = null
@@ -232,9 +307,36 @@ String(seconds).padStart(2,"0")
 
 }
 
-// ============================
-// LOAD MACHINES
-// ============================
+function updateLiveTimers(){
+
+for(const machineNumber in machineEndTimes){
+
+const end = machineEndTimes[machineNumber]
+const el = document.getElementById("time-"+machineNumber)
+
+if(!el) continue
+
+const now = Date.now()
+const diff = end - now
+
+if(diff <= 0){
+el.innerText = "Finished"
+continue
+}
+
+const minutes = Math.floor(diff/60000)
+const seconds = Math.floor((diff%60000)/1000)
+
+el.innerText =
+String(minutes).padStart(2,"0")
++
+":"
++
+String(seconds).padStart(2,"0")
+
+}
+
+}
 
 async function loadMachines(){
 
@@ -244,12 +346,14 @@ isLoading = true
 const container = document.getElementById("machineContainer")
 container.innerHTML = ""
 
+machineEndTimes = {}
+myQueuePosition = null
+reservedMachine = null
+
 try{
 
 const res = await fetch("http://localhost:3000/machines")
 const machines = await res.json()
-
-reservedMachine = null
 
 for(const machine of machines){
 
@@ -263,9 +367,22 @@ const myQueueIndex = queue.findIndex(q => String(q.room_number) === String(curre
 if(myQueueIndex !== -1){
 
 reservedMachine = machine.machine_number
+myQueuePosition = myQueueIndex + 1
 
 if(myQueueIndex === 0 && machine.status === "available"){
+
+if(queueConfirmedMachine !== machine.machine_number){
+showQueueNotification(machine.machine_number)
+}
+
+}
+
+if(machine.status === "reserved" && String(machine.current_user_name) === String(currentUser)){
+
+if(!countdownInterval){
 startCountdown(machine.machine_number)
+}
+
 }
 
 }
@@ -298,6 +415,15 @@ if(reservedMachine !== machine.machine_number){
 cancelDisabled = "disabled"
 }
 
+if(machine.status === "in_use" && myQueuePosition === 1){
+cancelDisabled = "disabled"
+}
+
+if(machine.status === "in_use" && machine.end_time){
+machineEndTimes[machine.machine_number] =
+new Date(machine.end_time).getTime()
+}
+
 const card = document.createElement("div")
 card.className = "machine-card"
 
@@ -321,6 +447,12 @@ ${statusText}
 
 <p>Queue : ${machine.queue_count}</p>
 
+<p>Time Left :
+<span id="time-${machine.machine_number}">
+-
+</span>
+</p>
+
 <div class="machine-buttons">
 
 <button
@@ -328,27 +460,26 @@ class="reserve-btn"
 onclick="openReservePopup(${machine.machine_number})"
 ${reserveDisabled}
 >
-
-Reserve </button>
+Reserve
+</button>
 
 <button
 class="cancel-btn"
 onclick="openCancelPopup(${machine.machine_number})"
 ${cancelDisabled}
 >
-
-Cancel </button>
+Cancel
+</button>
 
 <button
 class="report-btn"
 onclick="openReportPopup(${machine.machine_number})"
 ${machine.status === "broken" ? "disabled" : ""}
 >
-
-Report </button>
+Report
+</button>
 
 </div>
-
 `
 
 container.appendChild(card)
@@ -364,10 +495,6 @@ console.log("Load machine error:",err)
 isLoading = false
 
 }
-
-// ============================
-// RESERVE
-// ============================
 
 function openReservePopup(machineNumber){
 
@@ -406,18 +533,12 @@ async function reserveMachine(machineNumber){
 try{
 
 const res = await fetch("http://localhost:3000/reserve",{
-
 method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
+headers:{ "Content-Type":"application/json" },
 body:JSON.stringify({
 machine_number:machineNumber,
 room_number:currentUser
 })
-
 })
 
 const data = await res.json()
@@ -440,10 +561,6 @@ console.log("Reserve error:",err)
 }
 
 }
-
-// ============================
-// CANCEL
-// ============================
 
 function openCancelPopup(machineNumber){
 
@@ -487,21 +604,16 @@ async function cancelReservation(machineNumber){
 try{
 
 await fetch("http://localhost:3000/cancel",{
-
 method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
+headers:{ "Content-Type":"application/json" },
 body:JSON.stringify({
 machine_number:machineNumber,
 room_number:currentUser
 })
-
 })
 
 reservedMachine = null
+myQueuePosition = null
 
 clearInterval(countdownInterval)
 countdownInterval = null
@@ -519,10 +631,6 @@ console.log("Cancel error:",err)
 }
 
 }
-
-// ============================
-// REPORT
-// ============================
 
 function openReportPopup(machineNumber){
 
@@ -551,18 +659,12 @@ return
 }
 
 await fetch("http://localhost:3000/report",{
-
 method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
+headers:{ "Content-Type":"application/json" },
 body:JSON.stringify({
 machine_number:reportMachineNumber,
 message:selected.value
 })
-
 })
 
 alert("Report sent to admin")
@@ -572,10 +674,6 @@ popup.style.display = "none"
 }
 
 }
-
-// ============================
-// LOGOUT
-// ============================
 
 function setupLogout(){
 

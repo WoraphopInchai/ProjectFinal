@@ -153,8 +153,6 @@ Please scan QR at the washing machine
 
 <h1 id="countdownTimer">05:00</h1>
 
-<!-- QR CAMERA AREA -->
-
 <div id="qr-reader" style="width:250px;margin:20px auto;"></div>
 
 <div class="popup-buttons">
@@ -244,6 +242,40 @@ Are you sure you want to cancel this reservation?
 </div>
 
 </div>
+
+<!-- QUEUE POPUP (NEW) -->
+
+<div id="queuePopup" class="popup-overlay">
+
+<div class="popup-box">
+
+<h3 class="popup-title">🔔 Your Turn</h3>
+
+<p class="popup-text">
+Machine <b id="queueMachine"></b> is now available
+</p>
+
+<p class="popup-subtext">
+Please confirm within 2 minutes or your queue will be skipped
+</p>
+
+<div class="popup-buttons">
+
+<button id="confirmQueueBtn">Confirm</button>
+
+<button id="cancelQueueBtn">Cancel</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- NOTIFICATION SOUND -->
+
+<audio id="notifySound">
+<source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg">
+</audio>
 
 <!-- QR SCANNER LIBRARY -->
 

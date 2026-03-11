@@ -119,6 +119,8 @@ m.id,
 m.machine_number,
 m.status,
 m.current_user_name,
+m.start_time,
+m.end_time,
 COUNT(q.id) as queue_count
 FROM machines m
 LEFT JOIN machine_queue q
@@ -127,7 +129,9 @@ GROUP BY
 m.id,
 m.machine_number,
 m.status,
-m.current_user_name
+m.current_user_name,
+m.start_time,
+m.end_time
 ORDER BY m.machine_number ASC
 `)
 
@@ -193,7 +197,9 @@ await pool.query(
 await pool.query(
 `UPDATE machines
 SET status='available',
-current_user_name=NULL
+current_user_name=NULL,
+start_time=NULL,
+end_time=NULL
 WHERE id=?`,
 [id]
 )
@@ -265,7 +271,6 @@ VALUES (?,?,?)`,
 [machine_number,room_number,nextPos]
 )
 
-// ⭐ ส่งตำแหน่งคิวกลับไปให้ frontend
 const queue_position = nextPos
 
 const [machines]: any = await pool.query(
@@ -314,11 +319,16 @@ if(String(rows[0].current_user_name) !== String(room_number)){
 return c.json({message:"Not your reservation"},403)
 }
 
+const startTime = new Date()
+const endTime = new Date(startTime.getTime() + 30 * 1000)
+
 await pool.query(
 `UPDATE machines
-SET status='in_use'
+SET status='in_use',
+start_time=?,
+end_time=?
 WHERE machine_number=?`,
-[machine_number]
+[startTime,endTime,machine_number]
 )
 
 return c.json({message:"Machine confirmed. Washing started"})
@@ -333,6 +343,17 @@ app.post('/cancel', async (c) => {
 
 const body = await c.req.json()
 const { machine_number, room_number } = body
+
+const [machineRows]: any = await pool.query(
+`SELECT current_user_name FROM machines WHERE machine_number=?`,
+[machine_number]
+)
+
+if(machineRows.length === 0){
+return c.json({message:"Machine not found"},404)
+}
+
+const currentUser = machineRows[0].current_user_name
 
 await pool.query(
 `DELETE FROM machine_queue
@@ -350,6 +371,8 @@ ORDER BY position ASC`,
 [machine_number]
 )
 
+if(String(currentUser) === String(room_number)){
+
 const [next]: any = await pool.query(
 `SELECT room_number FROM machine_queue
 WHERE machine_number=?
@@ -363,7 +386,9 @@ if(next.length > 0){
 await pool.query(
 `UPDATE machines
 SET status='reserved',
-current_user_name=?
+current_user_name=?,
+start_time=NULL,
+end_time=NULL
 WHERE machine_number=?`,
 [next[0].room_number,machine_number]
 )
@@ -373,40 +398,18 @@ WHERE machine_number=?`,
 await pool.query(
 `UPDATE machines
 SET status='available',
-current_user_name=NULL
+current_user_name=NULL,
+start_time=NULL,
+end_time=NULL
 WHERE machine_number=?`,
 [machine_number]
 )
 
 }
 
+}
+
 return c.json({ message: "Reservation cancelled" })
-
-})
-
-// =====================
-// ADMIN RESET MACHINE
-// =====================
-
-app.post('/admin/reset', async (c) => {
-
-const body = await c.req.json()
-const { machine_number } = body
-
-await pool.query(
-`DELETE FROM machine_queue WHERE machine_number=?`,
-[machine_number]
-)
-
-await pool.query(
-`UPDATE machines
-SET status='available',
-current_user_name=NULL
-WHERE machine_number=?`,
-[machine_number]
-)
-
-return c.json({ message: "Machine reset success" })
 
 })
 
@@ -431,6 +434,87 @@ return c.json(rows)
 })
 
 // =====================
+// AUTO FINISH MACHINE
+// =====================
+
+async function autoFinishMachines(){
+
+const [machines]: any = await pool.query(
+`SELECT machine_number,end_time
+FROM machines
+WHERE status='in_use'`
+)
+
+const now = new Date()
+
+for(const machine of machines){
+
+if(!machine.end_time) continue
+
+const end = new Date(machine.end_time)
+
+if(now >= end){
+
+await pool.query(
+`DELETE FROM machine_queue
+WHERE machine_number=?
+ORDER BY position ASC
+LIMIT 1`,
+[machine.machine_number]
+)
+
+await pool.query(`SET @pos := 0`)
+
+await pool.query(
+`UPDATE machine_queue
+SET position = (@pos := @pos + 1)
+WHERE machine_number=?
+ORDER BY position ASC`,
+[machine.machine_number]
+)
+
+const [next]: any = await pool.query(
+`SELECT room_number
+FROM machine_queue
+WHERE machine_number=?
+ORDER BY position ASC
+LIMIT 1`,
+[machine.machine_number]
+)
+
+if(next.length > 0){
+
+await pool.query(
+`UPDATE machines
+SET status='available',
+current_user_name=?,
+start_time=NULL,
+end_time=NULL
+WHERE machine_number=?`,
+[next[0].room_number,machine.machine_number]
+)
+
+}else{
+
+await pool.query(
+`UPDATE machines
+SET status='available',
+current_user_name=NULL,
+start_time=NULL,
+end_time=NULL
+WHERE machine_number=?`,
+[machine.machine_number]
+)
+
+}
+
+}
+
+}
+
+}
+
+// =====================
 // HOME
 // =====================
 
@@ -448,5 +532,7 @@ port: 3000
 }, (info) => {
 
 console.log(`Server running http://localhost:${info.port}`)
+
+setInterval(autoFinishMachines,5000)
 
 })
