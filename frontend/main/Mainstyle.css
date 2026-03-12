@@ -449,3 +449,76 @@ margin-bottom:8px;
 font-size:14px;
 }
 
+/* ฟองสบู่ */
+
+.bubbles{
+position:fixed;
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+overflow:hidden;
+pointer-events:none;
+
+z-index:-1;
+}
+
+.bubbles span{
+
+position:absolute;
+bottom:-120px;
+
+width:25px;
+height:25px;
+
+background:rgba(255,255,255,0.6);
+
+border-radius:50%;
+
+box-shadow:
+inset 0 0 10px rgba(255,255,255,0.8),
+0 0 10px rgba(255,255,255,0.6);
+
+animation:rise 12s infinite ease-in;
+
+}
+
+/* animation */
+
+@keyframes rise{
+
+0%{
+transform:translateY(0) scale(0.8);
+opacity:0;
+}
+
+50%{
+opacity:1;
+}
+
+100%{
+transform:translateY(-1200px) scale(1.2);
+opacity:0;
+}
+
+}
+
+/* ตำแหน่งฟอง */
+
+.bubbles span:nth-child(1){ left:5%; animation-duration:8s; }
+.bubbles span:nth-child(2){ left:15%; animation-duration:12s; }
+.bubbles span:nth-child(3){ left:25%; animation-duration:9s; }
+.bubbles span:nth-child(4){ left:35%; animation-duration:11s; }
+.bubbles span:nth-child(5){ left:45%; animation-duration:10s; }
+.bubbles span:nth-child(6){ left:55%; animation-duration:14s; }
+.bubbles span:nth-child(7){ left:65%; animation-duration:9s; }
+.bubbles span:nth-child(8){ left:75%; animation-duration:13s; }
+.bubbles span:nth-child(9){ left:85%; animation-duration:10s; }
+.bubbles span:nth-child(10){ left:95%; animation-duration:12s; }
+.bubbles span:nth-child(11){ left:30%; animation-duration:15s; }
+.bubbles span:nth-child(12){ left:60%; animation-duration:11s; }
+.bubbles span:nth-child(13){ left:70%; animation-duration:8s; }
+.bubbles span:nth-child(14){ left:40%; animation-duration:13s; }
+.bubbles span:nth-child(15){ left:20%; animation-duration:10s; }
